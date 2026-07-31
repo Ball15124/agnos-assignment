@@ -1,65 +1,66 @@
+"use client";
+import Link from "next/dist/client/link";
 import Image from "next/image";
+
+const RoleCard = ({
+  role,
+  description,
+  image,
+}: {
+  role: string;
+  description: string;
+  image: string;
+}) => {
+  return (
+    <Link
+      href={`/${role.toLowerCase()}`}
+      className="flex flex-col items-center justify-center p-4 rounded-lg shadow-md cursor-pointer w-1/2 hover:shadow-lg hover:shadow-primary/20 transition-shadow duration-300"
+    >
+      <Image src={image} alt={role} width={64} height={64} className="mb-4" loading="eager" />
+      <h2 className="text-2xl font-bold">{role}</h2>
+      <p className="text-gray-600">{description}</p>
+    </Link>
+  );
+};
+
+const Role = [
+  {
+    ROLE: "Patient",
+    DESCRIPTION: "Input your health information.",
+    IMAGE: "/patient.png",
+  },
+  {
+    ROLE: "Staff",
+    DESCRIPTION: "Monitering and manage patient data.",
+    IMAGE: "/staff.png",
+  },
+];
 
 export default function Home() {
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
+    <div className="flex flex-col flex-1 items-center justify-center font-sans">
+      <div className="flex flex-col p-8 gap-10 w-full md:max-w-3xl">
+        <div className="gap-2 text-center">
+          <h1 className="text-4xl font-bold text-primary">
+            Please select your role
           </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+          <p className="text-base">
+            This is a data collection app for patients and staff. The app allows
+            patients to input their health information and staff to monitor and
+            manage patient data.
           </p>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
+        <div className="flex justify-between gap-10">
+          {Role.map((role) => (
+            <RoleCard
+              key={role.ROLE}
+              role={role.ROLE}
+              description={role.DESCRIPTION}
+              image={role.IMAGE}
             />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+          ))}
         </div>
-      </main>
+      </div>
     </div>
   );
 }
