@@ -2,6 +2,7 @@ import { Patient } from "@/features/patient/types/patient.type";
 import { ClientMessage } from "@/features/realtime/types";
 import { updatePatientValue } from "@/shared/utils/updatePatientValues";
 import { randomUUID } from "node:crypto";
+import { createServer } from "node:http";
 import { WebSocket, WebSocketServer } from "ws";
 
 export interface PatientSession {
@@ -20,8 +21,17 @@ export interface SubmittedPatient {
 
 const port = Number(process.env.PORT) || 8080;
 
+const server = createServer((_req, res) => {
+  res.writeHead(200);
+  res.end("WebSocket server is running");
+});
+
 const wss = new WebSocketServer({
-  port,
+  server,
+});
+
+server.listen(port, () => {
+  console.log(`WebSocket server running on ${port}`);
 });
 
 const patients = new Map<string, PatientSession>();
@@ -379,5 +389,3 @@ wss.on("connection", (socket) => {
     handleDisconnect(socket);
   });
 });
-
-console.log(`WebSocket server running on ${port}`);
