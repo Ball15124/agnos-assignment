@@ -8,7 +8,9 @@ const usePatientRealtime = (nickname: string | null) => {
   useEffect(() => {
     if (!nickname) return;
 
-    const socket = new WebSocket(process.env.NEXT_PUBLIC_WS_URL ?? "ws://localhost:8080");
+    const socket = new WebSocket(
+      process.env.NEXT_PUBLIC_WS_URL ?? "ws://localhost:8080",
+    );
     socketRef.current = socket;
 
     socket.onopen = () => {
@@ -40,6 +42,29 @@ const usePatientRealtime = (nickname: string | null) => {
       socket.close();
     };
   }, [nickname]);
+
+  useEffect(() => {
+    if (!patientId) return;
+
+    const handleBeforeUnload = () => {
+      const socket = socketRef.current;
+
+      if (socket?.readyState !== WebSocket.OPEN) return;
+
+      socket.send(
+        JSON.stringify({
+          type: "PATIENT_LEAVE",
+          patientId,
+        }),
+      );
+    };
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+    };
+  }, [patientId]);
 
   const handleFormActivity = (field: string, value: string) => {
     if (!patientId) return;
@@ -96,12 +121,30 @@ const usePatientRealtime = (nickname: string | null) => {
     );
   };
 
+  const handlePatientLeave = () => {
+    if (!patientId) return;
+
+    const socket = socketRef.current;
+
+    if (socket?.readyState !== WebSocket.OPEN) return;
+
+    socket.send(
+      JSON.stringify({
+        type: "PATIENT_LEAVE",
+        patientId,
+      }),
+    );
+
+    socket.close();
+  };
+
   return {
     patientId,
     handleFormActivity,
     handleFieldFocus,
     handleFieldBlur,
     handleFormSubmit,
+    handlePatientLeave,
   };
 };
 

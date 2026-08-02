@@ -26,43 +26,139 @@ const useStaffRealtime = ({ setSelectedPatientId }: UseStaffRealtimeProps) => {
 
     socket.onmessage = (event) => {
       const message = JSON.parse(event.data) as ServerMessage;
-      if (message.type === "PATIENT_CONNECTED") {
-        setPatients((prev) => {
-          const existingPatient = prev.find(
-            (patient) => patient.id === message.patientId,
+
+      switch (message.type) {
+        case "PATIENT_CONNECTED":
+          setPatients((prev) => {
+            if (prev.some((patient) => patient.id === message.patientId)) {
+              return prev;
+            }
+
+            return [
+              ...prev,
+              {
+                id: message.patientId,
+                status: "idle",
+                nickname: message.nickname,
+                connectedAt: message.connectedAt,
+                values: message.values,
+                focusedField: message.focusedField,
+              },
+            ];
+          });
+          break;
+
+        case "PATIENT_DISCONNECTED":
+          setPatients((prev) =>
+            prev.map((patient) =>
+              patient.id === message.patientId
+                ? { ...patient, status: "disconnected" }
+                : patient,
+            ),
           );
 
-          if (existingPatient) {
-            return prev;
-          }
+          setTimeout(() => {
+            setPatients((prev) =>
+              prev.filter((patient) => patient.id !== message.patientId),
+            );
 
-          return [
-            ...prev,
-            {
-              id: message.patientId,
-              status: "idle",
-              nickname: message.nickname,
-              connectedAt: message.connectedAt,
-              values: message.values,
-              focusedField: message.focusedField,
-            },
-          ];
-        });
-      }
+            setSelectedPatientId((prev) =>
+              prev === message.patientId ? null : prev,
+            );
+          }, 10000);
 
-      if (message.type === "PATIENT_DISCONNECTED") {
-        setPatients((prev) =>
-          prev.map((patient) =>
-            patient.id === message.patientId
-              ? {
-                  ...patient,
-                  status: "disconnected",
-                }
-              : patient,
-          ),
-        );
+          break;
 
-        setTimeout(() => {
+        case "PATIENT_ACTIVE":
+          setPatients((prev) =>
+            prev.map((patient) =>
+              patient.id === message.patientId
+                ? { ...patient, status: "active" }
+                : patient,
+            ),
+          );
+          break;
+
+        case "PATIENT_IDLE":
+          setPatients((prev) =>
+            prev.map((patient) =>
+              patient.id === message.patientId
+                ? { ...patient, status: "idle" }
+                : patient,
+            ),
+          );
+          break;
+
+        case "PATIENT_FIELD_FOCUS":
+          setPatients((prev) =>
+            prev.map((patient) =>
+              patient.id === message.patientId
+                ? { ...patient, focusedField: message.field }
+                : patient,
+            ),
+          );
+          break;
+
+        case "PATIENT_FIELD_BLUR":
+          setPatients((prev) =>
+            prev.map((patient) =>
+              patient.id === message.patientId
+                ? { ...patient, focusedField: undefined }
+                : patient,
+            ),
+          );
+          break;
+
+        case "PATIENT_FIELD_UPDATE":
+          setPatients((prev) =>
+            prev.map((patient) =>
+              patient.id === message.patientId
+                ? {
+                    ...patient,
+                    values: updatePatientValue(
+                      patient.values,
+                      message.field,
+                      message.value,
+                    ),
+                  }
+                : patient,
+            ),
+          );
+          break;
+
+        case "PATIENT_SUBMITTED":
+          setPatients((prev) => {
+            const existingPatient = prev.find(
+              (patient) => patient.id === message.patientId,
+            );
+
+            if (existingPatient) {
+              return prev.map((patient) =>
+                patient.id === message.patientId
+                  ? {
+                      ...patient,
+                      status: "submitted",
+                      connectedAt: message.connectedAt,
+                      values: message.values,
+                    }
+                  : patient,
+              );
+            }
+
+            return [
+              ...prev,
+              {
+                id: message.patientId,
+                nickname: message.nickname,
+                status: "submitted",
+                connectedAt: message.connectedAt,
+                values: message.values,
+              },
+            ];
+          });
+          break;
+
+        case "PATIENT_EXPIRED":
           setPatients((prev) =>
             prev.filter((patient) => patient.id !== message.patientId),
           );
@@ -70,122 +166,11 @@ const useStaffRealtime = ({ setSelectedPatientId }: UseStaffRealtimeProps) => {
           setSelectedPatientId((prev) =>
             prev === message.patientId ? null : prev,
           );
-        }, 10000);
-      }
+          break;
 
-      if (message.type === "PATIENT_ACTIVE") {
-        setPatients((prev) =>
-          prev.map((patient) =>
-            patient.id === message.patientId
-              ? {
-                  ...patient,
-                  status: "active",
-                }
-              : patient,
-          ),
-        );
-      }
-
-      if (message.type === "PATIENT_FIELD_FOCUS") {
-        setPatients((prev) =>
-          prev.map((patient) =>
-            patient.id === message.patientId
-              ? {
-                  ...patient,
-                  focusedField: message.field,
-                }
-              : patient,
-          ),
-        );
-      }
-
-      if (message.type === "PATIENT_FIELD_BLUR") {
-        setPatients((prev) =>
-          prev.map((patient) =>
-            patient.id === message.patientId
-              ? {
-                  ...patient,
-                  focusedField: undefined,
-                }
-              : patient,
-          ),
-        );
-      }
-
-      if (message.type === "PATIENT_FIELD_UPDATE") {
-        setPatients((prev) =>
-          prev.map((patient) =>
-            patient.id === message.patientId
-              ? {
-                  ...patient,
-                  values: updatePatientValue(
-                    patient.values,
-                    message.field,
-                    message.value,
-                  ),
-                }
-              : patient,
-          ),
-        );
-      }
-
-      if (message.type === "PATIENT_IDLE") {
-        setPatients((prev) =>
-          prev.map((patient) =>
-            patient.id === message.patientId
-              ? {
-                  ...patient,
-                  status: "idle",
-                }
-              : patient,
-          ),
-        );
-      }
-
-      if (message.type === "PATIENT_SUBMITTED") {
-        setPatients((prev) => {
-          const existingPatient = prev.find(
-            (patient) => patient.id === message.patientId,
-          );
-
-          if (existingPatient) {
-            return prev.map((patient) =>
-              patient.id === message.patientId
-                ? {
-                    ...patient,
-                    status: "submitted",
-                    connectedAt: message.connectedAt,
-                    values: message.values,
-                  }
-                : patient,
-            );
-          }
-
-          return [
-            ...prev,
-            {
-              id: message.patientId,
-              nickname: message.nickname,
-              status: "submitted",
-              connectedAt: message.connectedAt,
-              values: message.values,
-            },
-          ];
-        });
-      }
-
-      if (message.type === "PATIENT_EXPIRED") {
-        setPatients((prev) =>
-          prev.filter((patient) => patient.id !== message.patientId),
-        );
-
-        setSelectedPatientId((prev) =>
-          prev === message.patientId ? null : prev,
-        );
-      }
-
-      if (message.type === "STAFF_READY") {
-        setLoading(false);
+        case "STAFF_READY":
+          setLoading(false);
+          break;
       }
     };
 

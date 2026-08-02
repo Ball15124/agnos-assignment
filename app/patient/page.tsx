@@ -25,6 +25,7 @@ const PatientPage = () => {
     handleFieldFocus,
     handleFieldBlur,
     handleFormSubmit,
+    handlePatientLeave,
   } = usePatientRealtime(nickname);
 
   const handleNicknameSubmit = (nickname: string) => {
@@ -43,7 +44,7 @@ const PatientPage = () => {
       setShowLeaveDialog(true);
       return;
     }
-
+    handlePatientLeave();
     router.push("/");
   };
 
@@ -99,6 +100,7 @@ const PatientPage = () => {
           theme="dialog_warning"
           onClose={() => setShowLeaveDialog(false)}
           onConfirm={() => {
+            handlePatientLeave();
             setShowLeaveDialog(false);
             router.push("/");
           }}

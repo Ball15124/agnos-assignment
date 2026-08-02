@@ -72,9 +72,7 @@ const handlePatientJoin = (socket: WebSocket, nickname?: string) => {
   patients.set(patientId, patient);
   socketToPatient.set(socket, patientId);
 
-  console.log(
-    `Patient connected: ${patientNickname} (${patientId})`,
-  );
+  console.log(`Patient connected: ${patientNickname} (${patientId})`);
 
   socket.send(
     JSON.stringify({
@@ -163,10 +161,7 @@ const handlePatientActive = (patientId: string) => {
   patientActivityTimers.set(patientId, timer);
 };
 
-const handlePatientFieldFocus = (
-  patientId: string,
-  field: string,
-) => {
+const handlePatientFieldFocus = (patientId: string, field: string) => {
   const patient = patients.get(patientId);
 
   if (!patient || submittedPatients.has(patientId)) {
@@ -208,11 +203,7 @@ const handlePatientFieldUpdate = (
     return;
   }
 
-  patient.values = updatePatientValue(
-    patient.values,
-    field,
-    value,
-  );
+  patient.values = updatePatientValue(patient.values, field, value);
 
   broadcastToStaff({
     type: "PATIENT_FIELD_UPDATE",
@@ -251,15 +242,18 @@ const handlePatientSubmitted = (patientId: string) => {
     clearTimeout(existingSubmittedTimer);
   }
 
-  const submittedTimer = setTimeout(() => {
-    submittedPatients.delete(patientId);
-    submittedPatientTimers.delete(patientId);
+  const submittedTimer = setTimeout(
+    () => {
+      submittedPatients.delete(patientId);
+      submittedPatientTimers.delete(patientId);
 
-    broadcastToStaff({
-      type: "PATIENT_EXPIRED",
-      patientId,
-    });
-  }, 30 * 60 * 1000);
+      broadcastToStaff({
+        type: "PATIENT_EXPIRED",
+        patientId,
+      });
+    },
+    30 * 60 * 1000,
+  );
 
   submittedPatientTimers.set(patientId, submittedTimer);
 
@@ -270,6 +264,33 @@ const handlePatientSubmitted = (patientId: string) => {
     connectedAt: patient.connectedAt,
     values: patient.values,
   });
+};
+
+const handlePatientLeave = (patientId: string) => {
+  const patient = patients.get(patientId);
+
+  if (!patient || submittedPatients.has(patientId)) {
+    return;
+  }
+
+  const activityTimer = patientActivityTimers.get(patientId);
+
+  if (activityTimer) {
+    clearTimeout(activityTimer);
+    patientActivityTimers.delete(patientId);
+  }
+
+  patientFocusedFields.delete(patientId);
+  patients.delete(patientId);
+  socketToPatient.delete(patient.socket);
+
+  broadcastToStaff({
+    type: "PATIENT_DISCONNECTED",
+    nickname: patient.nickname,
+    patientId,
+  });
+
+  patient.socket.close();
 };
 
 const handleDisconnect = (socket: WebSocket) => {
@@ -302,9 +323,7 @@ const handleDisconnect = (socket: WebSocket) => {
     return;
   }
 
-  console.log(
-    `Patient disconnected: ${patient.nickname} (${patientId})`,
-  );
+  console.log(`Patient disconnected: ${patient.nickname} (${patientId})`);
 
   broadcastToStaff({
     type: "PATIENT_DISCONNECTED",
@@ -315,9 +334,7 @@ const handleDisconnect = (socket: WebSocket) => {
 
 wss.on("connection", (socket) => {
   socket.on("message", (rawMessage) => {
-    const message = JSON.parse(
-      rawMessage.toString(),
-    ) as ClientMessage;
+    const message = JSON.parse(rawMessage.toString()) as ClientMessage;
 
     switch (message.type) {
       case "JOIN":
@@ -333,10 +350,7 @@ wss.on("connection", (socket) => {
         break;
 
       case "PATIENT_FIELD_FOCUS":
-        handlePatientFieldFocus(
-          message.patientId,
-          message.field,
-        );
+        handlePatientFieldFocus(message.patientId, message.field);
         break;
 
       case "PATIENT_FIELD_BLUR":
@@ -353,6 +367,10 @@ wss.on("connection", (socket) => {
 
       case "PATIENT_SUBMITTED":
         handlePatientSubmitted(message.patientId);
+        break;
+
+      case "PATIENT_LEAVE":
+        handlePatientLeave(message.patientId);
         break;
     }
   });
