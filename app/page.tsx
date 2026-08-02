@@ -52,7 +52,7 @@ function RoleTitle({ title }: { title: string }) {
   }, [title]);
 
   return (
-    <h1 className="font-mono text-4xl font-bold text-primary">
+    <h1 className="font-mono text-2xl md:text-4xl font-bold text-primary">
       {displayText}
       <span className="ml-1 animate-pulse">_</span>
     </h1>
@@ -78,7 +78,7 @@ export default function Home() {
       <div className="flex flex-col p-8 gap-10 w-full md:max-w-3xl">
         <div className="gap-2 text-center">
           <RoleTitle title="Please select your role" />
-          <p className="text-base">
+          <p className="text-sm sm:text-base">
             <span className="text-primary font-bold">Care</span>
             <span className="text-blue-500 font-bold">Terminal</span> is a <span className="text-blue-600">real-time{" "}</span>
             patient information monitoring system that enables staff to securely

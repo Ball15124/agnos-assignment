@@ -18,6 +18,7 @@ const StaffPage = () => {
   const sortedPatients = [...patients].sort(
     (a, b) => b.connectedAt - a.connectedAt,
   );
+  const indicator = ["active", "idle", "submitted", "disconnected"] as const;
 
   return (
     <div className="flex flex-col h-full md:flex-row relative overflow-hidden">
@@ -28,15 +29,25 @@ const StaffPage = () => {
       >
         <div className="mx-auto flex w-full max-w-6xl flex-col px-6 overflow-hidden h-full min-h-0">
           <div className="w-full">
-            <BackButton onClick={() => router.push("/")}/>
+            <BackButton onClick={() => router.push("/")} />
           </div>
-          <h1 className="text-3xl font-bold text-primary text-center">
+          <h1 className="text-2xl md:text-3xl font-bold text-primary text-center">
             Staff View
           </h1>
-          <p className="mb-10 text-center text-gray-600">
+          <p className="text-center text-gray-600 text-sm sm:text-base">
             Welcome to the staff view. Here you can manage patient data and
-            monitor their information.
+            monitor their information using the color indicators below.
           </p>
+          <div className="flex gap-4 flex-wrap w-full justify-center mt-2 mb-10">
+            {indicator.map((status) => (
+              <div key={status} className="flex gap-2 items-center capitalize">
+                <div
+                  className={`h-2 w-2 rounded-full ${getStatusColor(status)}`}
+                />
+                {status}
+              </div>
+            ))}
+          </div>
           <PatientTable
             patients={sortedPatients}
             loading={loading}
