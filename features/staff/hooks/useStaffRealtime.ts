@@ -7,12 +7,14 @@ interface UseStaffRealtimeProps {
   setSelectedPatientId: Dispatch<SetStateAction<string | null>>;
 }
 
-const useStaffRealtime = ({setSelectedPatientId} : UseStaffRealtimeProps) => {
+const useStaffRealtime = ({ setSelectedPatientId }: UseStaffRealtimeProps) => {
   const [patients, setPatients] = useState<Patient[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const socket = new WebSocket("ws://localhost:8080");
+    const socket = new WebSocket(
+      process.env.NEXT_PUBLIC_WS_URL ?? "ws://localhost:8080",
+    );
     socket.onopen = () => {
       socket.send(
         JSON.stringify({

@@ -18,8 +18,10 @@ export interface SubmittedPatient {
   values: Patient["values"];
 }
 
+const port = Number(process.env.PORT) || 8080;
+
 const wss = new WebSocketServer({
-  port: 8080,
+  port,
 });
 
 const patients = new Map<string, PatientSession>();
@@ -360,4 +362,4 @@ wss.on("connection", (socket) => {
   });
 });
 
-console.log("WebSocket server running on ws://localhost:8080");
+console.log(`WebSocket server running on ${port}`);

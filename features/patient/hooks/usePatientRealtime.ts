@@ -8,7 +8,7 @@ const usePatientRealtime = (nickname: string | null) => {
   useEffect(() => {
     if (!nickname) return;
 
-    const socket = new WebSocket("ws://localhost:8080");
+    const socket = new WebSocket(process.env.NEXT_PUBLIC_WS_URL ?? "ws://localhost:8080");
     socketRef.current = socket;
 
     socket.onopen = () => {
