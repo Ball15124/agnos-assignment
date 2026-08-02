@@ -26,6 +26,7 @@ interface PatientFormProps {
   onFocus?: (field: PatientField) => void;
   onBlur?: (field: PatientField) => void;
   onDirtyChange?: (isDirty: boolean) => void;
+  isPatientSubmitted?: boolean
 }
 
 const PatientForm = ({
@@ -37,6 +38,7 @@ const PatientForm = ({
   onFocus,
   onBlur,
   onDirtyChange,
+  isPatientSubmitted
 }: PatientFormProps) => {
   const [isSubmitted, setIsSubmitted] = useState(false);
   const patientForm = useForm<PatientFormInput, unknown, PatientFormData>({
@@ -84,6 +86,7 @@ const PatientForm = ({
           <CustomInput
             id="firstname"
             label="First Name"
+            placeholder={isPatientSubmitted || isSubmitted ? "-" : ""}
             value={readOnly ? (realTimeUpdate?.firstname ?? "") : field.value}
             onChange={(e) => {
               field.onChange(e);
@@ -109,6 +112,7 @@ const PatientForm = ({
           <CustomInput
             id="middlename"
             label="Middle Name"
+            placeholder={isPatientSubmitted || isSubmitted ? "-" : ""}
             value={readOnly ? (realTimeUpdate?.middlename ?? "") : field.value}
             onChange={(e) => {
               field.onChange(e);
@@ -133,6 +137,7 @@ const PatientForm = ({
           <CustomInput
             id="lastname"
             label="Last Name"
+            placeholder={isPatientSubmitted || isSubmitted ? "-" : ""}
             value={readOnly ? (realTimeUpdate?.lastname ?? "") : field.value}
             onChange={(e) => {
               field.onChange(e);
@@ -199,6 +204,7 @@ const PatientForm = ({
             isRequired
             disabled={isSubmitted || readOnly}
             remoteFocus={focusField === "gender"}
+            isPatientSubmitted={isPatientSubmitted || isSubmitted}
           />
         )}
       />
@@ -210,6 +216,7 @@ const PatientForm = ({
           <CustomInput
             id="phoneNumber"
             label="Phone Number"
+            placeholder={isPatientSubmitted || isSubmitted ? "-" : ""}
             value={readOnly ? (realTimeUpdate?.phoneNumber ?? "") : field.value}
             onChange={(e) => {
               field.onChange(e);
@@ -235,6 +242,7 @@ const PatientForm = ({
           <CustomInput
             id="email"
             label="Email"
+            placeholder={isPatientSubmitted || isSubmitted ? "-" : ""}
             value={readOnly ? (realTimeUpdate?.email ?? "") : field.value}
             onChange={(e) => {
               field.onChange(e);
@@ -260,6 +268,7 @@ const PatientForm = ({
           <CustomInput
             id="address"
             label="Address"
+            placeholder={isPatientSubmitted || isSubmitted ? "-" : ""}
             value={readOnly ? (realTimeUpdate?.address ?? "") : field.value}
             onChange={(e) => {
               field.onChange(e);
@@ -302,6 +311,7 @@ const PatientForm = ({
             isRequired
             disabled={isSubmitted || readOnly}
             remoteFocus={focusField === "preferredLanguage"}
+            isPatientSubmitted={isPatientSubmitted || isSubmitted}
           />
         )}
       />
@@ -328,6 +338,7 @@ const PatientForm = ({
             isRequired
             disabled={isSubmitted || readOnly}
             remoteFocus={focusField === "nationality"}
+            isPatientSubmitted={isPatientSubmitted || isSubmitted}
           />
         )}
       />
@@ -346,7 +357,7 @@ const PatientForm = ({
             render={({ field }) => (
               <CustomInput
                 id="emergencyContactName"
-                placeholder="Name"
+                placeholder={isPatientSubmitted || isSubmitted ? "-" : "Name"}
                 value={
                   readOnly
                     ? (realTimeUpdate?.emergencyContact?.name ?? "")
@@ -376,7 +387,7 @@ const PatientForm = ({
             render={({ field }) => (
               <CustomInput
                 id="emergencyContactRelationship"
-                placeholder="Relationship"
+                placeholder={isPatientSubmitted || isSubmitted ?  "-" : "Relationship"}
                 value={
                   readOnly
                     ? (realTimeUpdate?.emergencyContact?.relationship ?? "")
@@ -427,6 +438,7 @@ const PatientForm = ({
             error={patientForm.formState.errors.religion?.message}
             disabled={isSubmitted || readOnly}
             remoteFocus={focusField === "religion"}
+            isPatientSubmitted={isPatientSubmitted || isSubmitted}
           />
         )}
       />

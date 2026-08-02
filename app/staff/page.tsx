@@ -104,6 +104,7 @@ const StaffPage = () => {
                 readOnly={true}
                 realTimeUpdate={patient.values}
                 focusField={patient.focusedField}
+                isPatientSubmitted={patient.status === "submitted"}
               />
             </div>
           </div>
