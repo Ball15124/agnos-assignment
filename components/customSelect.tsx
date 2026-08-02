@@ -27,6 +27,7 @@ const CustomSelect = ({
       )}
       <div className="relative w-full">
         <select
+          id={id}
           {...props}
           disabled={props.disabled}
           className={`group w-full appearance-none rounded-md border ${error ? "border-red-500" : "border-gray-300"} py-2 pl-3 pr-10 focus:ring-1 focus:ring-blue-700 focus:border-blue-700 disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-gray-200 ${remoteFocus ? "ring-2 ring-blue-700 border-blue-700 outline-none" : ""} ${props.value === "" && !props.disabled ? "text-gray-400" : ""}`}
@@ -38,7 +39,11 @@ const CustomSelect = ({
           )}
           {options ? (
             options.map((option) => (
-              <option key={option.value} value={option.value} className="text-black">
+              <option
+                key={option.value}
+                value={option.value}
+                className="text-black"
+              >
                 {option.label}
               </option>
             ))
@@ -50,7 +55,7 @@ const CustomSelect = ({
         </select>
 
         <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2">
-          <ChevronDown/>
+          <ChevronDown />
         </span>
       </div>
       {error && <p className="text-red-500 text-sm">{error}</p>}
