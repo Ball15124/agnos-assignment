@@ -65,6 +65,13 @@ Then open [http://localhost:3000](http://localhost:3000) in your browser.
 
 - **Deployed App:** [https://care-terminal.vercel.app/]
 
+## Notes
+
+- The WebSocket server is hosted on Render's free tier, which spins down 
+  after periods of inactivity. The first request after idle may take 
+  20-30 seconds to respond while the instance wakes up. Subsequent 
+  requests will be fast
+
 ## Project Structure
 
 See `docs/PROJECT_STRUCTURE.md` for a full breakdown of the folder/file structure.
