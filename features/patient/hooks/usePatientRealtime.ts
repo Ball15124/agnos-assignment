@@ -43,29 +43,6 @@ const usePatientRealtime = (nickname: string | null) => {
     };
   }, [nickname]);
 
-  useEffect(() => {
-    if (!patientId) return;
-
-    const handleBeforeUnload = () => {
-      const socket = socketRef.current;
-
-      if (socket?.readyState !== WebSocket.OPEN) return;
-
-      socket.send(
-        JSON.stringify({
-          type: "PATIENT_LEAVE",
-          patientId,
-        }),
-      );
-    };
-
-    window.addEventListener("beforeunload", handleBeforeUnload);
-
-    return () => {
-      window.removeEventListener("beforeunload", handleBeforeUnload);
-    };
-  }, [patientId]);
-
   const handleFormActivity = (field: string, value: string) => {
     if (!patientId) return;
 
