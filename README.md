@@ -1,36 +1,88 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# CareTerminal
+
+CareTerminal is a real-time patient information monitoring system that enables staff to securely observe and manage patient form sessions as information is entered. Built with a responsive interface and real-time communication, it keeps staff updated on patient activity, form changes, and submission status.
+
+## Features
+
+- **Patient Form** — A responsive form for patients to enter their personal details (name, date of birth, gender, contact info, address, preferred language, nationality, emergency contact, religion).
+- **Staff View** — A real-time dashboard where staff can monitor patient input as it happens, field by field.
+- **Live Status Indicators** — Staff can see whether a patient is actively filling in the form, idle, or has submitted.
+- **Real-Time Synchronization** — Powered by WebSockets, so any change on the patient form reflects instantly on the staff view.
+- **Responsive Design** — Both the patient form and staff view adapt to mobile and desktop screen sizes.
+
+## Tech Stack
+
+- **Framework:** Next.js
+- **Styling:** TailwindCSS
+- **Real-Time Communication:** WebSockets (`ws`)
+- **Hosting:** Frontend deployed on [Vercel/Netlify — update with actual platform], WebSocket server deployed on Render
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
 
+- Node.js and npm installed
+
+### Installation
+
+1. Clone the repository
+   ```bash
+   git clone <repository-url>
+   ```
+2. Move into the project root
+   ```bash
+   cd agnos-assignment
+   ```
+3. Install dependencies
+   ```bash
+   npm i
+   ```
+
+### Running Locally
+
+The app requires two processes running at the same time — the WebSocket server and the Next.js dev server. Open two terminal windows:
+
+**Terminal 1 — start the WebSocket server** (listens on port `8080`)
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm run ws
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+**Terminal 2 — start the Next.js app**
+```bash
+npm run dev
+```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Then open [http://localhost:3000](http://localhost:3000) in your browser.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### Environment Variables
 
-## Learn More
+| Variable | Description | Default |
+|---|---|---|
+| `NEXT_PUBLIC_WS_URL` | WebSocket server URL used by the client | `ws://localhost:8080` |
+| `PORT` | Port the WebSocket server listens on | `8080` |
 
-To learn more about Next.js, take a look at the following resources:
+## Live Demo
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- **Deployed App:** [https://care-terminal.vercel.app/]
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Notes
 
-## Deploy on Vercel
+- The WebSocket server is hosted on Render's free tier, which spins down 
+  after periods of inactivity. The first request after idle may take 
+  20-30 seconds to respond while the instance wakes up. Subsequent 
+  requests will be fast
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Project Structure
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+See `docs/PROJECT_STRUCTURE.md` for a full breakdown of the folder/file structure.
+
+## Development Planning Documentation
+
+- `docs/PROJECT_STRUCTURE.md` — Explanation of the folder/file structure
+- `docs/DESIGN.md` — Design decisions for UI/UX across screen sizes
+- `docs/COMPONENT_ARCHITECTURE.md` — Description of main components and their purposes
+- `docs/REALTIME_SYNC_FLOW.md` — Summary of how real-time updates are handled and synchronized
+
+## License
+
+This project was built as part of a candidate assignment for Agnos.
