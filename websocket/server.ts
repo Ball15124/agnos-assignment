@@ -30,9 +30,29 @@ const wss = new WebSocketServer({
   server,
 });
 
-server.listen(port, () => {
-  console.log(`WebSocket server running on ${port}`);
-});
+const patientHeartbeatTimers = new Map<string, NodeJS.Timeout>();
+
+const startPatientHeartbeat = (socket: WebSocket, patientId: string) => {
+  let isAlive = true;
+
+  socket.on("pong", () => {
+    isAlive = true;
+  });
+
+  const timer = setInterval(() => {
+    if (!isAlive) {
+      socket.terminate();
+      clearInterval(timer);
+      patientHeartbeatTimers.delete(patientId);
+      return;
+    }
+
+    isAlive = false;
+    socket.ping();
+  }, 5000);
+
+  patientHeartbeatTimers.set(patientId, timer);
+};
 
 const patients = new Map<string, PatientSession>();
 const socketToPatient = new Map<WebSocket, string>();
@@ -81,6 +101,7 @@ const handlePatientJoin = (socket: WebSocket, nickname?: string) => {
 
   patients.set(patientId, patient);
   socketToPatient.set(socket, patientId);
+  startPatientHeartbeat(socket, patientId);
 
   console.log(`Patient connected: ${patientNickname} (${patientId})`);
 
@@ -283,23 +304,6 @@ const handlePatientLeave = (patientId: string) => {
     return;
   }
 
-  const activityTimer = patientActivityTimers.get(patientId);
-
-  if (activityTimer) {
-    clearTimeout(activityTimer);
-    patientActivityTimers.delete(patientId);
-  }
-
-  patientFocusedFields.delete(patientId);
-  patients.delete(patientId);
-  socketToPatient.delete(patient.socket);
-
-  broadcastToStaff({
-    type: "PATIENT_DISCONNECTED",
-    nickname: patient.nickname,
-    patientId,
-  });
-
   patient.socket.close();
 };
 
@@ -319,6 +323,13 @@ const handleDisconnect = (socket: WebSocket) => {
     patientActivityTimers.delete(patientId);
   }
 
+  const heartbeatTimer = patientHeartbeatTimers.get(patientId);
+
+  if (heartbeatTimer) {
+    clearInterval(heartbeatTimer);
+    patientHeartbeatTimers.delete(patientId);
+  }
+
   const patient = patients.get(patientId);
 
   patients.delete(patientId);
@@ -333,7 +344,9 @@ const handleDisconnect = (socket: WebSocket) => {
     return;
   }
 
-  console.log(`Patient disconnected: ${patient.nickname} (${patientId})`);
+  console.log(
+    `Patient disconnected: ${patient.nickname} (${patientId})`,
+  );
 
   broadcastToStaff({
     type: "PATIENT_DISCONNECTED",
@@ -388,4 +401,8 @@ wss.on("connection", (socket) => {
   socket.on("close", () => {
     handleDisconnect(socket);
   });
+});
+
+server.listen(port, () => {
+  console.log(`WebSocket server running on ${port}`);
 });

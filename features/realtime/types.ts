@@ -28,10 +28,6 @@ export type ClientMessage =
   | {
       type: "PATIENT_SUBMITTED";
       patientId: string;
-    }
-  | {
-      type: "PATIENT_LEAVE";
-      patientId: string;
     };
 
 export type ServerMessage =

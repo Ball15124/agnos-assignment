@@ -1,7 +1,7 @@
 # Design Overview
 
 ## Purpose
-This project is designed as a real-time patient intake and monitoring system. Patients enter information through a guided form while staff view live updates, status changes, and field focus in a responsive dashboard.
+This project is designed as a real-time patient intake and monitoring system. Patients enter information through a guided form while staff view live updates, status changes, field focus, and submission state in a responsive dashboard.
 
 ## UI Design
 

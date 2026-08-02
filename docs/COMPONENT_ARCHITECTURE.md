@@ -46,11 +46,12 @@ This project uses a feature-driven architecture combined with reusable UI compon
 
 ### `features/patient/hooks/usePatientRealtime.ts`
 - Purpose: Handle patient-side WebSocket interactions.
-- Design: Opens a socket on nickname set, sends JOIN, field focus/blur, active/update, submit, and leave events.
+- Design: Opens a socket on nickname set, sends JOIN, field focus/blur, active/update, and submit events.
 - Responsibilities:
   - Maintain patient socket connection.
   - Keep patient ID state.
   - Provide handlers for form events.
+  - Support the realtime flow used by the patient form.
 
 ### `features/staff/hooks/useStaffRealtime.ts`
 - Purpose: Handle staff-side WebSocket interactions.
@@ -70,6 +71,10 @@ This project uses a feature-driven architecture combined with reusable UI compon
 - Purpose: Safely update nested patient values on the staff side.
 - Design: Utility to apply field updates to the patient data structure without mutating incorrectly.
 
+### `features/patient/schemas/patient.schema.ts`
+- Purpose: Define form validation rules for patient input.
+- Design: Uses Zod to enforce required fields, field lengths, email format, and proper structure for nested emergency contact data.
+
 ## Page Components
 
 ### `app/patient/page.tsx`
@@ -88,13 +93,15 @@ This project uses a feature-driven architecture combined with reusable UI compon
   - Render a slide-up panel with `PatientForm` in read-only mode for the selected patient.
   - Use `useStaffRealtime` to keep patient list live.
 
-  ## Backend (`websocket/`)
- 
+## Backend (`websocket/`)
+
 - **`server.ts`** — Standalone Node WebSocket server, independent of the Next.js app. Maintains all real-time session state in memory:
   - Connected patients and their form values
   - Staff socket connections
   - Per-patient activity timers (active → idle transition)
   - Per-patient focused-field tracking
   - Submitted patients cache (with expiry)
-  The server acts as the single source of truth during a session, broadcasting every patient event to all connected staff sockets so the dashboard stays in sync in real time.
+  - Heartbeat timers to detect stale sockets
+
+The server acts as the single source of truth during a session, broadcasting every patient event to all connected staff sockets so the dashboard stays in sync in real time.
 

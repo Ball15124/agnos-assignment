@@ -5,6 +5,7 @@ The realtime sync flow connects the patient form and staff view through a WebSoc
 
 ## Connection Flow
 - Patient and staff clients connect to the same WebSocket server.
+- The server now runs a heartbeat mechanism for patient sockets using ping/pong checks.
 - Each client sends a `JOIN` event:
   - Patients send `JOIN` with role `patient` and nickname.
   - Staff sends `JOIN` with role `staff`.
@@ -36,9 +37,9 @@ The realtime sync flow connects the patient form and staff view through a WebSoc
 - The server marks the patient as submitted, clears focus state, and broadcasts the submission event.
 - Submitted sessions are retained for a period and can expire after 30 minutes.
 
-### `PATIENT_LEAVE`
-- Sent when the patient intentionally leaves the page or closes the browser.
-- The server removes the patient session and notifies staff of disconnection.
+### Disconnect handling
+- When the patient leaves the page or closes the browser, the socket is closed and the server removes the patient session.
+- Staff are notified through the existing disconnect flow.
 
 ## Server-side behavior
 - The server tracks:
@@ -48,6 +49,7 @@ The realtime sync flow connects the patient form and staff view through a WebSoc
   - activity timers for idle detection
   - submitted patient sessions and expiration timers
   - current focused field per patient
+  - heartbeat timers for patient socket health monitoring
 - On every event, the server validates session state and only broadcasts from active, non-submitted patients.
 - The server uses helper functions like `updatePatientValue` to apply nested field updates reliably.
 
@@ -75,7 +77,6 @@ The realtime sync flow connects the patient form and staff view through a WebSoc
 - `PATIENT_FIELD_BLUR`: patient ID
 - `PATIENT_FIELD_UPDATE`: patient ID + field + value
 - `PATIENT_SUBMITTED`: patient ID
-- `PATIENT_LEAVE`: patient ID
 
 ### Server broadcasts
 - `PATIENT_ID_ASSIGNED`: assigned patient ID
@@ -100,3 +101,4 @@ The realtime sync flow connects the patient form and staff view through a WebSoc
 - This architecture is optimized for live monitoring rather than two-way editing.
 - The server does not send patient updates back to the originating patient; it only broadcasts to staff.
 - Focus tracking gives staff context about what the patient is working on without exposing intermediate typing before the field value change is sent.
+- Heartbeats improve reliability by disconnecting silent or broken sockets automatically.
